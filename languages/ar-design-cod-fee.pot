@@ -1,0 +1,152 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AR Design COD Fee for WooCommerce 1.0.1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: ar-design-cod-fee\n"
+
+msgid "AR Design COD"
+msgstr ""
+
+msgid "AR Design COD Fee"
+msgstr ""
+
+msgid "AR Design COD Fee for WooCommerce"
+msgstr ""
+
+msgid "AR Design COD Fee requires WooCommerce version %s or higher."
+msgstr ""
+
+msgid "AR Design takeover of the WooCommerce Cash on Delivery gateway. Extra COD fee is controlled by the AR Design COD Fee shipping section."
+msgstr ""
+
+msgid "Aktualizácia AR Design COD Fee zlyhala. Predchádzajúca verzia bola automaticky obnovená zo zálohy."
+msgstr ""
+
+msgid "Changelog nie je dostupný."
+msgstr ""
+
+msgid "COD podľa dopravcu"
+msgstr ""
+
+msgid "Configurable COD fee by carrier."
+msgstr ""
+
+msgid "Cenová pravidla pro DPD"
+msgstr ""
+
+msgid "Cenová pravidla pro GLS"
+msgstr ""
+
+msgid "Cenová pravidla pro Packetu"
+msgstr ""
+
+msgid "Cenová pravidla pro osobní odběr"
+msgstr ""
+
+msgid "Dobierka"
+msgstr ""
+
+msgid "Dobierka pre DPD"
+msgstr ""
+
+msgid "Dobierka pre GLS"
+msgstr ""
+
+msgid "Dobierka pre Packetu"
+msgstr ""
+
+msgid "Dobierka pre osobný odber"
+msgstr ""
+
+msgid "DPD"
+msgstr ""
+
+msgid "GLS"
+msgstr ""
+
+msgid "Packeta"
+msgstr ""
+
+msgid "osobný odber"
+msgstr ""
+
+msgid "ostatných dopravcov"
+msgstr ""
+
+msgid "Platba v hotovosti pri prebratí zásielky."
+msgstr ""
+
+msgid "Pokyny zobrazené po dokončení objednávky. Samotný extra dobierkový poplatok riadi AR Design COD Fee modul."
+msgstr ""
+
+msgid "Použiť extra dobierkový poplatok podľa zvoleného dopravcu."
+msgstr ""
+
+msgid "Použije sa, ak zvolená doprava nepatrí do DPD / GLS / Packeta / local pickup. Můžete zadat pevnou částku `1.5` nebo procento z objednávky `2.5%`."
+msgstr ""
+
+msgid "Použije se v režimu „podle ceny objednávky“, pokud dopravce nepatří do DPD / GLS / Packeta / local pickup."
+msgstr ""
+
+msgid "Používá se jen v režimu „podle ceny objednávky“. Formát stejný jako u DPD."
+msgstr ""
+
+msgid "Používá se jen v režimu „podle ceny objednávky“. Jeden řádek = `max_cena|fee`, např. `50|1.5` nebo `50|2.5%`. Pro objednávku do 50 € se použije fee 1.5 € nebo 2.5 % z objednávky."
+msgstr ""
+
+msgid "Povoliť extra dobierku"
+msgstr ""
+
+msgid "Pevná částka podle dopravce"
+msgstr ""
+
+msgid "Podle ceny objednávky"
+msgstr ""
+
+msgid "Prah objednávky pre dobierku zdarma"
+msgstr ""
+
+msgid "Pre aktuálne zvoleného dopravcu (%1$s) je extra poplatok za dobierku %2$s."
+msgstr ""
+
+msgid "Pre aktuálne zvoleného dopravcu (%s) sa teraz extra poplatok za dobierku neuplatní."
+msgstr ""
+
+msgid "Režim výpočtu extra dobierky"
+msgstr ""
+
+msgid "Samostatný modul pre nastaviteľnú extra dobierku podľa dopravcu vo WooCommerce."
+msgstr ""
+
+msgid "Text zobrazený zákazníkovi pri pokladni. Extra dobierkový poplatok riadi AR Design COD Fee modul v WooCommerce > Shipping > COD podľa dopravcu."
+msgstr ""
+
+msgid "Táto sekcia je nový source of truth pre extra dobierkový poplatok podľa zvolenej dopravy. Pôvodná WooCommerce COD gateway zostáva platobnou metódou, ale cenu extra dobierky riadi výhradne tento modul."
+msgstr ""
+
+msgid "V režimu „pevná částka“ se používají pole níže s částkou pro každého dopravce. V režimu „podle ceny objednávky“ se používají cenová pravidla."
+msgstr ""
+
+msgid "Výchozí cenová pravidla pro ostatní dopravce"
+msgstr ""
+
+msgid "Výchozí dobierka pre ostatných dopravcov"
+msgstr ""
+
+msgid "Ak je hodnota košíka vyššia ako tento prah, extra dobierka z tejto sekcie sa nebude účtovať. Nastavte 0 alebo nechajte prázdne, ak nechcete globálny limit."
+msgstr ""
+
+msgid "Extra dobierkový poplatok pre DPD metódy (`wc_dpd_*`, prípadne `slovakparcelservice_*`). Můžete zadat pevnou částku `1.5` nebo procento z objednávky `2.5%`."
+msgstr ""
+
+msgid "Extra dobierkový poplatok pre GLS metódy. Můžete zadat pevnou částku `1.5` nebo procento z objednávky `2.5%`."
+msgstr ""
+
+msgid "Extra dobierkový poplatok pre Packetu. Můžete zadat pevnou částku `1.5` nebo procento z objednávky `2.5%`. Poznámka: Packeta môže mať zároveň vlastný COD surcharge v carrier nastaveniach."
+msgstr ""
+
+msgid "Extra dobierkový poplatok pre `local_pickup`. Můžete zadat pevnou částku `1.5` nebo procento z objednávky `2.5%`."
+msgstr ""

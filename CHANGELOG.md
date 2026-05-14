@@ -1,0 +1,14 @@
+# Changelog
+
+## 1.0.1
+
+- Sjednocena kostra modulu s ostatními AR Design pluginy.
+- Přidány `Core`, updater, rollback manager a release metadata.
+- Přidána `languages` vrstva a GitHub workflow pro release.
+- Zachována stávající logika takeoveru WooCommerce COD gateway a výpočtu extra dobírky.
+
+## 1.0.0
+
+- Zaveden samostatný modul pro extra COD fee podle dopravce.
+- Přidán takeover WooCommerce `cod` gateway.
+- Přidána podpora fixed a price-based COD fee pravidel.
