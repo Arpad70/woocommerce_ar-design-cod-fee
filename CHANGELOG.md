@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+- Doplnen `readme.txt` pro WordPress plugin format.
+- Dokoncen git housekeeping repozitare (`.gitignore`, ignorace build artefaktu, executable bit release skriptu).
+- Publikovan follow-up release, aby GitHub tag odpovidal kompletne pushnutemu stavu repozitare.
+
 ## 1.0.1
 
 - Sjednocena kostra modulu s ostatními AR Design pluginy.

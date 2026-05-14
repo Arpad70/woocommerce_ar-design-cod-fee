@@ -1,8 +1,18 @@
 # Release
 
-## 1.0.1
+## 1.0.2
 
 Aktualni release modulu AR Design COD Fee.
+
+### Zmeny
+
+- Doplnen `readme.txt` pro WordPress plugin format.
+- Doplnen `.gitignore` a dokoncen release housekeeping repozitare.
+- Vytvoren follow-up release tak, aby tag odpovidal finalnimu pushnutemu stavu modulu.
+
+## 1.0.1
+
+Predchozi release modulu AR Design COD Fee.
 
 ### Zmeny
 
