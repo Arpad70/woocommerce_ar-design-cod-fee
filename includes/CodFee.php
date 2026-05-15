@@ -9,6 +9,7 @@ final class CodFee
     public static function init(): void
     {
         add_action('woocommerce_cart_calculate_fees', [__CLASS__, 'addFeeToCart'], 20);
+        add_action('woocommerce_cart_calculate_fees', [__CLASS__, 'removePacketaCodSurcharge'], 30);
         add_action('wp_enqueue_scripts', [__CLASS__, 'refreshCheckoutAfterPaymentChange'], 20);
         add_filter('woocommerce_available_payment_gateways', [__CLASS__, 'normalizeCodGatewayPresentation'], 20);
         add_action('init', [__CLASS__, 'syncCoreCodGatewaySettings'], 20);
@@ -274,6 +275,43 @@ final class CodFee
         }
 
         $cart->add_fee(__('Dobierka', 'woocommerce'), $fee, false);
+    }
+
+    public static function removePacketaCodSurcharge($cart): void
+    {
+        if (!is_object($cart) || !method_exists($cart, 'fees_api')) {
+            return;
+        }
+
+        $chosen = WC()->session ? WC()->session->get('chosen_payment_method') : '';
+        if ($chosen !== 'cod' || self::detectCarrier(self::getCurrentChosenShippingMethod()) !== 'packeta') {
+            return;
+        }
+
+        $feesApi = $cart->fees_api();
+        if (!is_object($feesApi) || !method_exists($feesApi, 'get_fees') || !method_exists($feesApi, 'set_fees')) {
+            return;
+        }
+
+        $packetaCodFeeNames = array_unique([
+            __('COD surcharge', 'packeta'),
+            'COD surcharge',
+        ]);
+        $packetaCodFeeIds = array_map('sanitize_title', $packetaCodFeeNames);
+        $filteredFees = [];
+
+        foreach ($feesApi->get_fees() as $fee) {
+            $name = is_object($fee) && isset($fee->name) ? (string) $fee->name : '';
+            $id = is_object($fee) && isset($fee->id) ? (string) $fee->id : '';
+
+            if (in_array($name, $packetaCodFeeNames, true) || in_array($id, $packetaCodFeeIds, true)) {
+                continue;
+            }
+
+            $filteredFees[] = $fee;
+        }
+
+        $feesApi->set_fees($filteredFees);
     }
 
     public static function refreshCheckoutAfterPaymentChange(): void

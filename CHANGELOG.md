@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 - 2026-05-15
+
+- Doplněna další pravidla pro výpočet extra dobírky podle dopravce.
+- Release srovnává lokální pracovní změny s GitHub release stavem.
+
 ## 1.0.2
 
 - Doplnen `readme.txt` pro WordPress plugin format.
