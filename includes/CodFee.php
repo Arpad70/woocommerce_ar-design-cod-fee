@@ -6,11 +6,14 @@ defined('ABSPATH') || exit;
 
 final class CodFee
 {
+    private const GLS_PICKUP_INFO_SESSION_KEY = 'gls_pickup_info';
+
     public static function init(): void
     {
         add_action('woocommerce_cart_calculate_fees', [__CLASS__, 'addFeeToCart'], 20);
         add_action('woocommerce_cart_calculate_fees', [__CLASS__, 'removePacketaCodSurcharge'], 30);
         add_action('wp_enqueue_scripts', [__CLASS__, 'refreshCheckoutAfterPaymentChange'], 20);
+        add_filter('woocommerce_available_payment_gateways', [__CLASS__, 'filterCodGatewayAvailabilityByPickupPoint'], 15);
         add_filter('woocommerce_available_payment_gateways', [__CLASS__, 'normalizeCodGatewayPresentation'], 20);
         add_action('init', [__CLASS__, 'syncCoreCodGatewaySettings'], 20);
     }
@@ -322,6 +325,169 @@ final class CodFee
                 'jQuery(function($){$(document.body).on("change", "input[name=payment_method], input[name^=shipping_method], select.shipping_method", function(){$(document.body).trigger("update_checkout");});});'
             );
         }
+    }
+
+    public static function filterCodGatewayAvailabilityByPickupPoint(array $gateways): array
+    {
+        if (!isset($gateways['cod'])) {
+            return $gateways;
+        }
+
+        if (is_admin() && !wp_doing_ajax()) {
+            return $gateways;
+        }
+
+        $chosenShippingMethod = self::getCurrentChosenShippingMethod();
+        if ($chosenShippingMethod === '') {
+            return $gateways;
+        }
+
+        if (self::isCodUnavailableForSelectedPickupPoint($chosenShippingMethod)) {
+            unset($gateways['cod']);
+        }
+
+        return $gateways;
+    }
+
+    private static function isCodUnavailableForSelectedPickupPoint(string $chosenShippingMethod): bool
+    {
+        $methodId = strtolower(trim((string) strtok($chosenShippingMethod, ':')));
+
+        if ($methodId === 'wc_dpd_parcelshop') {
+            return self::isDpdCodUnavailable();
+        }
+
+        if (str_starts_with($methodId, 'gls_shipping_method_parcel_locker') || str_starts_with($methodId, 'gls_shipping_method_parcel_shop')) {
+            return self::isGlsCodUnavailable();
+        }
+
+        return false;
+    }
+
+    private static function isDpdCodUnavailable(): bool
+    {
+        if (!function_exists('WC') || !WC()->session) {
+            return false;
+        }
+
+        $chosenParcelshop = WC()->session->get('wc_dpd_chosen_parcelshop', []);
+        if (!is_array($chosenParcelshop) || $chosenParcelshop === []) {
+            return false;
+        }
+
+        $codSupport = self::normalizeBooleanFlag($chosenParcelshop['wc_dpd_parcelshop_cod'] ?? null);
+
+        return $codSupport === false;
+    }
+
+    private static function isGlsCodUnavailable(): bool
+    {
+        $pickupInfo = self::getGlsPickupInfo();
+        if ($pickupInfo === []) {
+            return false;
+        }
+
+        foreach ([
+            ['acceptsCash'],
+            ['acceptsCOD'],
+            ['acceptsCod'],
+            ['cashOnDelivery'],
+            ['cashOnDeliveryEnabled'],
+            ['cashOnDeliveryPossible'],
+            ['paymentOptions', 'cashOnDelivery'],
+            ['paymentOptions', 'cod'],
+            ['services', 'cashOnDelivery'],
+            ['services', 'cod'],
+            ['features', 'accepts-cash-payments'],
+            ['features', 'acceptsCash'],
+        ] as $path) {
+            $value = self::getNestedValue($pickupInfo, $path);
+            $normalized = self::normalizeBooleanFlag($value);
+
+            if ($normalized !== null) {
+                return $normalized === false;
+            }
+        }
+
+        return false;
+    }
+
+    private static function getGlsPickupInfo(): array
+    {
+        $rawPickupInfo = null;
+
+        if (isset($_POST['gls_pickup_info'])) {
+            $rawPickupInfo = wp_unslash($_POST['gls_pickup_info']);
+        }
+
+        if (($rawPickupInfo === null || $rawPickupInfo === '') && isset($_POST['post_data'])) {
+            parse_str(wp_unslash($_POST['post_data']), $postedData);
+            $rawPickupInfo = $postedData['gls_pickup_info'] ?? null;
+        }
+
+        if (($rawPickupInfo === null || $rawPickupInfo === '') && function_exists('WC') && WC()->session) {
+            $rawPickupInfo = WC()->session->get(self::GLS_PICKUP_INFO_SESSION_KEY, '');
+        }
+
+        if (!is_string($rawPickupInfo) || trim($rawPickupInfo) === '') {
+            return [];
+        }
+
+        $decoded = json_decode(wp_unslash($rawPickupInfo), true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private static function normalizeBooleanFlag($value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return ((int) $value) === 1;
+        }
+
+        if (is_string($value)) {
+            $normalized = strtolower(trim($value));
+
+            if (in_array($normalized, ['1', 'true', 'yes', 'y', 'allowed', 'available', 'supported'], true)) {
+                return true;
+            }
+
+            if (in_array($normalized, ['0', 'false', 'no', 'n', 'blocked', 'disallowed', 'unavailable', 'unsupported'], true)) {
+                return false;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, string> $path
+     * @return mixed
+     */
+    private static function getNestedValue(array $data, array $path)
+    {
+        $value = $data;
+
+        foreach ($path as $segment) {
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                return null;
+            }
+
+            $value = $value[$segment];
+        }
+
+        return $value;
     }
 
     public static function normalizeCodGatewayPresentation(array $gateways): array

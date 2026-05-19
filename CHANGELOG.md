@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-05-20
+
+- Pri checkoute sa dobierka automaticky skryje pre DPD Pickup / Pickup Station, keď vybraný pickup point nepodporuje COD.
+- Pri GLS Parcel Locker / Parcel Shop sa dobierka skryje podľa capability flagov z vybraného pickup pointu a checkout sa po výbere miesta okamžite obnoví.
+
 ## 1.0.3 - 2026-05-15
 
 - Doplněna další pravidla pro výpočet extra dobírky podle dopravce.
