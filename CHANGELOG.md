@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 - 2026-05-23
+
+- Release/build pipeline je zladená so spoločným AR Design kontraktom cez `scripts/build-plugin.sh` a GitHub release workflow.
+- Pridaný `uninstall.php`, aby mal plugin explicitný uninstall contract pri samostatnom release artefakte.
+
 ## 1.0.4 - 2026-05-20
 
 - Pri checkoute sa dobierka automaticky skryje pre DPD Pickup / Pickup Station, keď vybraný pickup point nepodporuje COD.

@@ -16,6 +16,8 @@ final class CodFee
         add_filter('woocommerce_available_payment_gateways', [__CLASS__, 'filterCodGatewayAvailabilityByPickupPoint'], 15);
         add_filter('woocommerce_available_payment_gateways', [__CLASS__, 'normalizeCodGatewayPresentation'], 20);
         add_action('init', [__CLASS__, 'syncCoreCodGatewaySettings'], 20);
+        add_action('woocommerce_store_api_checkout_update_order_from_request', [__CLASS__, 'validateCodAvailabilityOnStoreApi'], 20, 2);
+        add_action('woocommerce_rest_checkout_process_payment_with_context', [__CLASS__, 'validateCodAvailabilityBeforeBlocksPayment'], 20, 2);
     }
 
     public static function getManagedGatewayBaseDescription(): string
@@ -499,5 +501,70 @@ final class CodFee
         $gateways['cod']->description = self::getManagedGatewayDescription();
 
         return $gateways;
+    }
+
+    public static function validateCodAvailabilityOnStoreApi($order, $request): void
+    {
+        if (!$order instanceof \WC_Order) {
+            return;
+        }
+
+        $requestedPaymentMethod = '';
+
+        if ($request instanceof \WP_REST_Request) {
+            $requestedPaymentMethod = (string) ($request->get_param('payment_method') ?? '');
+        }
+
+        self::validateCodAvailabilityForOrder($order, $requestedPaymentMethod);
+    }
+
+    public static function validateCodAvailabilityBeforeBlocksPayment($context, $result): void
+    {
+        $contextData = is_object($context) ? (array) $context : [];
+        $order = $contextData['order'] ?? null;
+
+        if (!$order instanceof \WC_Order) {
+            return;
+        }
+
+        self::validateCodAvailabilityForOrder($order);
+    }
+
+    private static function validateCodAvailabilityForOrder(\WC_Order $order, string $requestedPaymentMethod = ''): void
+    {
+        $paymentMethod = $requestedPaymentMethod !== ''
+            ? $requestedPaymentMethod
+            : (string) $order->get_payment_method();
+
+        if ($paymentMethod !== 'cod') {
+            return;
+        }
+
+        $chosenShippingMethod = self::getOrderShippingMethod($order);
+
+        if ($chosenShippingMethod === '') {
+            $chosenShippingMethod = self::getCurrentChosenShippingMethod();
+        }
+
+        if ($chosenShippingMethod === '') {
+            return;
+        }
+
+        if (self::isCodUnavailableForSelectedPickupPoint($chosenShippingMethod)) {
+            throw new \Exception(__('Cash on delivery is not available for the selected pickup point.', 'ar-design-cod-fee'));
+        }
+    }
+
+    private static function getOrderShippingMethod(\WC_Order $order): string
+    {
+        foreach ($order->get_shipping_methods() as $shippingMethod) {
+            if (!is_object($shippingMethod) || !method_exists($shippingMethod, 'get_method_id')) {
+                continue;
+            }
+
+            return (string) $shippingMethod->get_method_id();
+        }
+
+        return '';
     }
 }
