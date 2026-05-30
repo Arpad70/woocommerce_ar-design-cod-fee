@@ -4,6 +4,8 @@ namespace ArDesign\CodFee;
 
 defined('ABSPATH') || exit;
 
+require_once __DIR__ . '/helpers.php';
+
 class Settings extends \WC_Shipping_Method
 {
     public const SETTINGS_ID_KEY = 'ar_design_cod_settings';
@@ -158,7 +160,7 @@ class Settings extends \WC_Shipping_Method
         return $sections;
     }
 
-    public static function getShippingSectionSettings(array $settings, $current_section): array
+    public static function getShippingSectionSettings(array $settings, mixed $current_section): array
     {
         if ($current_section !== self::SETTINGS_ID_KEY) {
             return $settings;
@@ -197,23 +199,6 @@ class Settings extends \WC_Shipping_Method
 
     public static function getDefaultSettings(): array
     {
-        $settings = get_option(self::SETTINGS_OPTION_KEY, []);
-        $settings = is_array($settings) ? $settings : [];
-
-        return array_merge([
-            self::ENABLED_OPTION_KEY => 'yes',
-            self::FEE_MODE_OPTION_KEY => 'fixed',
-            self::THRESHOLD_OPTION_KEY => '200',
-            self::DEFAULT_FEE_OPTION_KEY => '1',
-            self::DPD_FEE_OPTION_KEY => '1',
-            self::GLS_FEE_OPTION_KEY => '1',
-            self::PACKETA_FEE_OPTION_KEY => '1',
-            self::LOCAL_PICKUP_FEE_OPTION_KEY => '0',
-            self::DEFAULT_PRICE_RULES_OPTION_KEY => "50|1\n100|1\n200|1",
-            self::DPD_PRICE_RULES_OPTION_KEY => "50|1\n100|1\n200|1",
-            self::GLS_PRICE_RULES_OPTION_KEY => "50|1\n100|1\n200|1",
-            self::PACKETA_PRICE_RULES_OPTION_KEY => "50|1\n100|1\n200|1",
-            self::LOCAL_PICKUP_PRICE_RULES_OPTION_KEY => "200|0",
-        ], $settings);
+        return Helpers::getDefaultSettings();
     }
 }

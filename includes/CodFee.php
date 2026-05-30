@@ -4,6 +4,8 @@ namespace ArDesign\CodFee;
 
 defined('ABSPATH') || exit;
 
+require_once __DIR__ . '/helpers.php';
+
 final class CodFee
 {
     private const GLS_PICKUP_INFO_SESSION_KEY = 'gls_pickup_info';
@@ -73,159 +75,37 @@ final class CodFee
 
     public static function detectCarrier(?string $chosenShippingMethod): string
     {
-        $chosenShippingMethod = strtolower(trim((string) $chosenShippingMethod));
-        if ($chosenShippingMethod === '') {
-            return 'default';
-        }
-
-        $methodId = strtok($chosenShippingMethod, ':');
-        if ($methodId === false) {
-            $methodId = $chosenShippingMethod;
-        }
-
-        if (str_starts_with($methodId, 'wc_dpd_') || in_array($methodId, ['slovakparcelservice_address', 'slovakparcelservice_pickupplace'], true)) {
-            return 'dpd';
-        }
-
-        if (str_starts_with($methodId, 'gls_shipping_method_')) {
-            return 'gls';
-        }
-
-        if ($methodId === 'packetery_shipping_method' || str_starts_with($methodId, 'packeta_method_')) {
-            return 'packeta';
-        }
-
-        if ($methodId === 'local_pickup') {
-            return 'local_pickup';
-        }
-
-        return 'default';
+        return Helpers::detectCarrier($chosenShippingMethod);
     }
 
     public static function getFeeMode(): string
     {
-        $settings = Settings::getDefaultSettings();
-        $mode = (string) ($settings[Settings::FEE_MODE_OPTION_KEY] ?? 'fixed');
-
-        return in_array($mode, ['fixed', 'price_based'], true) ? $mode : 'fixed';
+        return Helpers::getFeeMode(Settings::getDefaultSettings());
     }
 
     public static function parsePriceRules(string $rawRules): array
     {
-        $lines = preg_split('/\r\n|\r|\n/', trim($rawRules));
-        $rules = [];
-
-        foreach ($lines as $line) {
-            $line = trim((string) $line);
-            if ($line === '') {
-                continue;
-            }
-
-            $parts = array_map('trim', explode('|', $line));
-            if (count($parts) !== 2) {
-                continue;
-            }
-
-            $maxPrice = Helpers::toFloat($parts[0]);
-            $feeMeta = Helpers::parseAmountExpression($parts[1]);
-
-            if ($maxPrice <= 0) {
-                continue;
-            }
-
-            $rules[] = [
-                'max_price' => $maxPrice,
-                'fee' => (float) $feeMeta['value'],
-                'fee_raw' => (string) $feeMeta['raw'],
-                'fee_is_percentage' => (bool) $feeMeta['is_percentage'],
-            ];
-        }
-
-        usort($rules, static function (array $left, array $right): int {
-            return $left['max_price'] <=> $right['max_price'];
-        });
-
-        return $rules;
+        return Helpers::parsePriceRules($rawRules);
     }
 
     public static function getFeeExpressionForShippingMethod(?string $chosenShippingMethod): string
     {
-        $settings = Settings::getDefaultSettings();
-        $carrier = self::detectCarrier($chosenShippingMethod);
-
-        return match ($carrier) {
-            'dpd' => (string) ($settings[Settings::DPD_FEE_OPTION_KEY] ?? ''),
-            'gls' => (string) ($settings[Settings::GLS_FEE_OPTION_KEY] ?? ''),
-            'packeta' => (string) ($settings[Settings::PACKETA_FEE_OPTION_KEY] ?? ''),
-            'local_pickup' => (string) ($settings[Settings::LOCAL_PICKUP_FEE_OPTION_KEY] ?? ''),
-            default => (string) ($settings[Settings::DEFAULT_FEE_OPTION_KEY] ?? ''),
-        };
+        return Helpers::getFeeExpressionForShippingMethod($chosenShippingMethod, Settings::getDefaultSettings());
     }
 
     public static function getPriceRulesForCarrier(string $carrier): array
     {
-        $settings = Settings::getDefaultSettings();
-
-        $optionKey = match ($carrier) {
-            'dpd' => Settings::DPD_PRICE_RULES_OPTION_KEY,
-            'gls' => Settings::GLS_PRICE_RULES_OPTION_KEY,
-            'packeta' => Settings::PACKETA_PRICE_RULES_OPTION_KEY,
-            'local_pickup' => Settings::LOCAL_PICKUP_PRICE_RULES_OPTION_KEY,
-            default => Settings::DEFAULT_PRICE_RULES_OPTION_KEY,
-        };
-
-        $rawRules = (string) ($settings[$optionKey] ?? '');
-        $rules = self::parsePriceRules($rawRules);
-
-        if ($carrier !== 'default' && $rules === []) {
-            $rules = self::parsePriceRules((string) ($settings[Settings::DEFAULT_PRICE_RULES_OPTION_KEY] ?? ''));
-        }
-
-        return $rules;
+        return Helpers::getPriceRulesForCarrier($carrier, Settings::getDefaultSettings());
     }
 
     public static function getFeeForShippingMethod(?string $chosenShippingMethod): float
     {
-        $settings = Settings::getDefaultSettings();
-        if (($settings[Settings::ENABLED_OPTION_KEY] ?? 'yes') !== 'yes') {
-            return 0.0;
-        }
-
-        if (self::getFeeMode() !== 'fixed') {
-            return 0.0;
-        }
-
-        $carrier = self::detectCarrier($chosenShippingMethod);
-
-        return (float) Helpers::parseAmountExpression(self::getFeeExpressionForShippingMethod($chosenShippingMethod))['value'];
+        return Helpers::getFeeForShippingMethod($chosenShippingMethod);
     }
 
     public static function getEffectiveFee(float $cartAmount, ?string $chosenShippingMethod): float
     {
-        $settings = Settings::getDefaultSettings();
-        if (($settings[Settings::ENABLED_OPTION_KEY] ?? 'yes') !== 'yes') {
-            return 0.0;
-        }
-
-        $threshold = Helpers::toFloat($settings[Settings::THRESHOLD_OPTION_KEY] ?? 200);
-        if ($threshold > 0 && $cartAmount > $threshold) {
-            return 0.0;
-        }
-
-        if (self::getFeeMode() === 'price_based') {
-            $carrier = self::detectCarrier($chosenShippingMethod);
-            $rules = self::getPriceRulesForCarrier($carrier);
-
-            foreach ($rules as $rule) {
-                if ($cartAmount <= (float) $rule['max_price']) {
-                    return Helpers::resolveAmountExpression($rule['fee_raw'] ?? ($rule['fee'] ?? 0), $cartAmount);
-                }
-            }
-
-            return 0.0;
-        }
-
-        return Helpers::resolveAmountExpression(self::getFeeExpressionForShippingMethod($chosenShippingMethod), $cartAmount);
+        return Helpers::getEffectiveFee($cartAmount, $chosenShippingMethod);
     }
 
     public static function getCurrentChosenShippingMethod(): string
@@ -260,7 +140,7 @@ final class CodFee
         };
     }
 
-    public static function addFeeToCart($cart): void
+    public static function addFeeToCart(mixed $cart): void
     {
         if (is_admin() && !defined('DOING_AJAX')) {
             return;
@@ -282,7 +162,7 @@ final class CodFee
         $cart->add_fee(__('Dobierka', 'woocommerce'), $fee, false);
     }
 
-    public static function removePacketaCodSurcharge($cart): void
+    public static function removePacketaCodSurcharge(mixed $cart): void
     {
         if (!is_object($cart) || !method_exists($cart, 'fees_api')) {
             return;
@@ -443,7 +323,7 @@ final class CodFee
     /**
      * @param mixed $value
      */
-    private static function normalizeBooleanFlag($value): ?bool
+    private static function normalizeBooleanFlag(mixed $value): ?bool
     {
         if ($value === null || $value === '') {
             return null;
@@ -503,7 +383,7 @@ final class CodFee
         return $gateways;
     }
 
-    public static function validateCodAvailabilityOnStoreApi($order, $request): void
+    public static function validateCodAvailabilityOnStoreApi(mixed $order, mixed $request): void
     {
         if (!$order instanceof \WC_Order) {
             return;
@@ -518,7 +398,7 @@ final class CodFee
         self::validateCodAvailabilityForOrder($order, $requestedPaymentMethod);
     }
 
-    public static function validateCodAvailabilityBeforeBlocksPayment($context, $result): void
+    public static function validateCodAvailabilityBeforeBlocksPayment(mixed $context, mixed $result): void
     {
         $contextData = is_object($context) ? (array) $context : [];
         $order = $contextData['order'] ?? null;
