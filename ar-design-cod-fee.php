@@ -3,7 +3,7 @@
 /*
  * Plugin Name: AR Design COD Fee for WooCommerce
  * Description: Samostatný modul pre nastaviteľnú extra dobierku podľa dopravcu vo WooCommerce.
- * Version: 1.0.9
+ * Version: 1.0.10
  * Author: Arpád Horák
  * Author URI: https://arpad-horak.cz
  * Update URI: https://github.com/Arpad70/woocommerce_ar-design-cod-fee
@@ -29,8 +29,8 @@ $plugin_dir = substr($plugin_dir, 0, strlen($plugin_dir) - 1);
 define('AR_DESIGN_COD_FEE_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('AR_DESIGN_COD_FEE_PLUGIN_DIR', $plugin_dir);
 define('AR_DESIGN_COD_FEE_PLUGIN_INDEX', __FILE__);
-define('AR_DESIGN_COD_FEE_PLUGIN_WC_MIN_VERSION', '1.0.9');
-define('AR_DESIGN_COD_FEE_VERSION', '1.0.9');
+define('AR_DESIGN_COD_FEE_PLUGIN_WC_MIN_VERSION', '1.0.10');
+define('AR_DESIGN_COD_FEE_VERSION', '1.0.10');
 define('AR_DESIGN_COD_FEE_BASENAME', plugin_basename(__FILE__));
 define('AR_DESIGN_COD_FEE_REPOSITORY', 'Arpad70/woocommerce_ar-design-cod-fee');
 define('AR_DESIGN_COD_FEE_TEXT_DOMAIN', 'ar-design-cod-fee');
