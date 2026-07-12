@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.11 - 2026-07-12
+
+- follow-up release pro synchronizaci release cadence s `ar-design-reporting` po produkční fakturační stabilizaci.
+- runtime chování COD fee modulu zůstává beze změny; release slouží k novému otagování, build artefaktu a konzistentní distribuci.
+
 ## 1.0.5 - 2026-05-23
 
 - Release/build pipeline je zladená so spoločným AR Design kontraktom cez `scripts/build-plugin.sh` a GitHub release workflow.
