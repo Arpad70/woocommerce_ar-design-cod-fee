@@ -159,32 +159,8 @@ final class CodFee
             return;
         }
 
-        $isTaxable = (bool) apply_filters(
-            'ar_design_cod_fee_is_taxable',
-            true,
-            $chosenShippingMethod,
-            $cartAmount,
-            $fee,
-            $cart
-        );
-
-        $taxClass = (string) apply_filters(
-            'ar_design_cod_fee_tax_class',
-            '',
-            $chosenShippingMethod,
-            $cartAmount,
-            $fee,
-            $cart
-        );
-
-        $taxClass = sanitize_title($taxClass);
-
-        // WooCommerce uses empty tax class for the standard rate.
-        if ($taxClass === 'standard') {
-            $taxClass = '';
-        }
-
-        $cart->add_fee(__('Dobierka', 'woocommerce'), $fee, $isTaxable, $isTaxable ? $taxClass : '');
+        // Dobierka podlieha štandardnej 23 % sadzbe v triede dph-23.
+        $cart->add_fee(__('Dobierka', 'woocommerce'), $fee, true, 'dph-23');
     }
 
     public static function removePacketaCodSurcharge(mixed $cart): void
